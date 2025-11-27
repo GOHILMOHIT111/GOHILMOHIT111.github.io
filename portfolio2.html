@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gohil Mohit | Data Scientist Portfolio</title>
+    
+    <!-- Fonts: Inter (Closest free Google Font to Apple's SF Pro) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- AOS CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Chart.js (Fixed Stable Version) & PapaParse -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+    <!-- Markdown Parser for Gemini Response -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Custom CSS for Apple-like Effects -->
+    <style>
+        :root {
+            --apple-dark: #000000;
+            --apple-gray: #1d1d1f;
+            --apple-text: #f5f5f7;
+            --apple-blue: #2997ff;
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(22, 22, 23, 0.8);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--apple-dark);
+            color: var(--apple-text);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(30, 30, 30, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+        }
+
+        .glass-nav {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Typography Gradients */
+        .text-gradient {
+            background: linear-gradient(135deg, #fff 0%, #888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .text-gradient-blue {
+            background: linear-gradient(135deg, #2997ff 0%, #00d4ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Utilities */
+        .scrolling-text span {
+            opacity: 0.1;
+            transition: opacity 0.5s ease;
+        }
+        .scrolling-text span.active {
+            opacity: 1;
+        }
+
+        /* Bento Grid Tile Hover */
+        .bento-tile {
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease;
+        }
+        .bento-tile:hover {
+            transform: scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        /* Modal Transitions */
+        .modal {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: scale(0.95);
+        }
+        .modal.open {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        /* AI Loader */
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-left-color: #2997ff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Gemini Loading Pulse */
+        .gemini-pulse {
+            animation: pulse-blue 2s infinite;
+        }
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(41, 151, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(41, 151, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(41, 151, 255, 0); }
+        }
+
+        /* Cursor */
+        .cursor-dot,
+        .cursor-outline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: white;
+        }
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+        
+        body:hover .cursor-outline {
+            width: 40px;
+            height: 40px;
+        }
+
+        /* Markdown Styles for Gemini Output */
+        .prose strong { color: #60a5fa; }
+        .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-top: 0.5rem; }
+        .prose li { margin-bottom: 0.25rem; }
+        .prose p { margin-bottom: 0.75rem; }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-500 selection:text-white">
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot hidden md:block"></div>
+    <div class="cursor-outline hidden md:block"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-nav transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <!-- UPDATED: Name instead of Apple Logo -->
+            <a href="#" class="text-xl font-bold tracking-tight hover:opacity-80 transition-opacity">
+                Gohil Mohit
+            </a>
+            <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-300 items-center">
+                <a href="#about" class="hover:text-white transition-colors">Who Am I</a>
+                <a href="#skills" class="hover:text-white transition-colors">Skills</a>
+                <a href="#projects" class="hover:text-white transition-colors">Projects</a>
+                <a href="#visualizer" class="hover:text-white transition-colors">Visualizer</a>
+                <a href="#" onclick="event.preventDefault(); document.getElementById('contact-modal').classList.add('open')" class="hover:text-white transition-colors">Contact</a>
+                <!-- LinkedIn Icon -->
+                <a href="https://www.linkedin.com/in/mohit-gohil-a3745a360/" target="_blank" class="hover:text-blue-500 transition-colors" title="Visit LinkedIn Profile">
+                    <i class="fa-brands fa-linkedin text-xl"></i>
+                </a>
+            </div>
+            <button onclick="document.getElementById('contact-modal').classList.add('open')" class="bg-white text-black px-4 py-1.5 rounded-full text-xs font-semibold hover:bg-gray-200 transition-colors">
+                Hire Me
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative h-screen flex items-center justify-center overflow-hidden">
+        <!-- Particles Background -->
+        <div id="particles-js" class="absolute inset-0 z-0 opacity-40"></div>
+        
+        <div class="z-10 text-center px-4" data-aos="fade-up" data-aos-duration="1500">
+            <h1 class="text-5xl md:text-8xl font-bold tracking-tight mb-4 text-gradient">
+                Gohil Mohit.
+            </h1>
+            <h2 class="text-3xl md:text-5xl font-semibold text-gray-500 mb-8">
+                Data Science Fresher.
+            </h2>
+            <div class="text-xl md:text-2xl text-gray-400 font-light h-8 mb-8">
+                Specialized in <span id="typed-text" class="text-white font-normal"></span>
+            </div>
+            
+            <div class="flex justify-center space-x-4">
+                <!-- Resume Download Button (Updated Link) -->
+                <!-- NOTE: Ensure your file is named 'Resume.pdf' and in the same folder -->
+                <a href="C:\Users\online\Downloads\Resume).pdf" download="Gohil_Mohit_Resume.pdf" class="bg-white text-black px-6 py-3 rounded-full font-medium hover:bg-gray-200 transition-colors">
+                    Download Resume <i class="fa-solid fa-download ml-2"></i>
+                </a>
+                <a href="#projects" class="glass text-white px-6 py-3 rounded-full font-medium hover:bg-white/10 transition-colors">
+                    View Work
+                </a>
+            </div>
+            
+            <div class="mt-12 animate-bounce">
+                <a href="#about" class="text-gray-500 hover:text-white transition-colors">
+                    <i class="fa-solid fa-chevron-down text-2xl"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Who Am I (Updated from Resume) -->
+    <section id="about" class="py-32 px-6 bg-black relative">
+        <div class="max-w-4xl mx-auto">
+            <h3 class="text-blue-500 text-sm font-semibold tracking-wider uppercase mb-4">About Me</h3>
+            <p id="scroll-text" class="scrolling-text text-2xl md:text-4xl font-semibold leading-tight text-gray-500">
+                Motivated Data Science fresher with a BSc IT background, trained in Python, SQL, Pandas, NumPy, and Machine Learning. I am skilled in analyzing real-world datasets and building predictive models. Eager to contribute to an organization with a problem-solving mindset and analytical thinking. Ready to learn, adapt, and grow in a Data Science role.
+            </p>
+            
+            <!-- Education & Certifications Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+                <div class="text-gray-400 text-lg">
+                    <h4 class="text-white font-bold mb-4 border-b border-gray-800 pb-2">Education</h4>
+                    <p class="mb-2"><i class="fa-solid fa-graduation-cap mr-2 text-blue-500"></i> Integrated MSc (IT) | GLS University</p>
+                    <p class="text-sm text-gray-500 ml-6">2022-2025 | CGPA: 6.31 (Sem IV)</p>
+                </div>
+                
+                <div class="text-gray-400 text-lg">
+                    <h4 class="text-white font-bold mb-4 border-b border-gray-800 pb-2">Certifications & Interests</h4>
+                    <p class="mb-2"><i class="fa-solid fa-certificate mr-2 text-yellow-500"></i> Data Science (Fingertips)</p>
+                    <div class="flex flex-wrap gap-2 mt-3">
+                        <span class="px-3 py-1 bg-gray-900 rounded-full text-xs text-gray-400 border border-gray-800">Cricket</span>
+                        <span class="px-3 py-1 bg-gray-900 rounded-full text-xs text-gray-400 border border-gray-800">Gaming</span>
+                        <span class="px-3 py-1 bg-gray-900 rounded-full text-xs text-gray-400 border border-gray-800">YouTube Creator</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills (Bento Grid + Tilt) -->
+    <section id="skills" class="py-24 px-6 bg-[#050505]">
+        <div class="max-w-7xl mx-auto">
+            <h3 class="text-3xl font-bold mb-12 text-center" data-aos="fade-up">Technical Skills</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Python -->
+                <div class="glass bento-tile p-8 rounded-3xl flex flex-col items-center justify-center text-center h-64" data-tilt data-tilt-max="10" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.2">
+                    <i class="fa-brands fa-python text-5xl mb-4 text-yellow-500"></i>
+                    <h4 class="text-xl font-bold">Python</h4>
+                    <p class="text-sm text-gray-400 mt-2">Pandas, NumPy</p>
+                </div>
+                
+                <!-- Machine Learning -->
+                <div class="glass bento-tile p-8 rounded-3xl flex flex-col items-center justify-center text-center h-64 md:col-span-2" data-tilt>
+                    <i class="fa-solid fa-brain text-5xl mb-4 text-pink-500"></i>
+                    <h4 class="text-xl font-bold">Machine Learning</h4>
+                    <p class="text-sm text-gray-400 mt-2">KNN, Predictive Modeling, Data Preprocessing</p>
+                </div>
+
+                <!-- SQL -->
+                <div class="glass bento-tile p-8 rounded-3xl flex flex-col items-center justify-center text-center h-64" data-tilt>
+                    <i class="fa-solid fa-database text-5xl mb-4 text-blue-500"></i>
+                    <h4 class="text-xl font-bold">SQL</h4>
+                    <p class="text-sm text-gray-400 mt-2">Database Management</p>
+                </div>
+
+                <!-- Visualization -->
+                <div class="glass bento-tile p-8 rounded-3xl flex flex-col items-center justify-center text-center h-64 md:col-span-2" data-tilt>
+                    <i class="fa-solid fa-chart-simple text-5xl mb-4 text-purple-500"></i>
+                    <h4 class="text-xl font-bold">Data Visualization</h4>
+                    <p class="text-sm text-gray-400 mt-2">Tableau, PowerBI, Excel</p>
+                </div>
+
+                <!-- Soft Skills -->
+                <div class="glass bento-tile p-8 rounded-3xl flex flex-col items-center justify-center text-center h-64 md:col-span-2" data-tilt>
+                    <i class="fa-solid fa-users text-5xl mb-4 text-green-500"></i>
+                    <h4 class="text-xl font-bold">Soft Skills</h4>
+                    <p class="text-sm text-gray-400 mt-2">Communication, Problem Solving, Analytical Thinking</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Showcase (Updated with Resume Projects) -->
+    <section id="projects" class="py-24 px-6 relative">
+        <div class="max-w-7xl mx-auto">
+            <h3 class="text-4xl font-bold mb-4">Featured Projects</h3>
+            <p class="text-gray-400 mb-12">Tap on a project to view details.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Project 1: KNN Loan -->
+                <div class="group cursor-pointer" onclick="openProjectModal('loan')">
+                    <div class="relative overflow-hidden rounded-3xl aspect-[4/3] mb-4">
+                        <div class="absolute inset-0 bg-gray-800 group-hover:scale-105 transition-transform duration-700"></div>
+                        <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-900 to-black">
+                            <i class="fa-solid fa-money-bill-wave text-6xl opacity-50"></i>
+                        </div>
+                    </div>
+                    <h4 class="text-2xl font-semibold group-hover:text-blue-500 transition-colors">KNN Loan Risk Analysis</h4>
+                    <p class="text-gray-500 mt-1">Classification • Credit Risk</p>
+                </div>
+
+                <!-- Project 2: Blinkit Dashboard -->
+                <div class="group cursor-pointer" onclick="openProjectModal('blinkit')">
+                    <div class="relative overflow-hidden rounded-3xl aspect-[4/3] mb-4">
+                        <div class="absolute inset-0 bg-gray-800 group-hover:scale-105 transition-transform duration-700"></div>
+                        <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-yellow-900 to-black">
+                            <i class="fa-solid fa-chart-pie text-6xl opacity-50"></i>
+                        </div>
+                    </div>
+                    <h4 class="text-2xl font-semibold group-hover:text-blue-500 transition-colors">Blinkit Sales Dashboard</h4>
+                    <p class="text-gray-500 mt-1">Tableau • Data Visualization</p>
+                </div>
+
+                <!-- Project 3: Blinkit SQL Analysis -->
+                <div class="group cursor-pointer" onclick="openProjectModal('blinkit-sql')">
+                    <div class="relative overflow-hidden rounded-3xl aspect-[4/3] mb-4">
+                        <div class="absolute inset-0 bg-gray-800 group-hover:scale-105 transition-transform duration-700"></div>
+                        <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-orange-900 to-black">
+                            <i class="fa-solid fa-database text-6xl opacity-50"></i>
+                        </div>
+                    </div>
+                    <h4 class="text-2xl font-semibold group-hover:text-blue-500 transition-colors">Blinkit Grocery SQL Analysis</h4>
+                    <p class="text-gray-500 mt-1">SQL • Business Insights</p>
+                </div>
+
+                <!-- Project 4: Python Problem Solving -->
+                <div class="group cursor-pointer" onclick="openProjectModal('python')">
+                    <div class="relative overflow-hidden rounded-3xl aspect-[4/3] mb-4">
+                        <div class="absolute inset-0 bg-gray-800 group-hover:scale-105 transition-transform duration-700"></div>
+                        <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-green-900 to-black">
+                            <i class="fa-brands fa-python text-6xl opacity-50"></i>
+                        </div>
+                    </div>
+                    <h4 class="text-2xl font-semibold group-hover:text-blue-500 transition-colors">Python Problem Solving</h4>
+                    <p class="text-gray-500 mt-1">Automation • Logic Building</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW: Instant Data Visualizer Section -->
+    <section id="visualizer" class="py-24 px-6 relative overflow-hidden bg-[#050505]">
+        <div class="max-w-6xl mx-auto glass rounded-3xl p-8 md:p-12 border border-gray-800" data-aos="fade-up">
+            <div class="text-center mb-10">
+                <span class="text-purple-500 font-semibold tracking-wider text-xs uppercase">Free Service</span>
+                <h3 class="text-3xl md:text-5xl font-bold mt-2 text-gradient-blue">Instant Data Visualizer</h3>
+                <p class="text-gray-400 mt-4 max-w-2xl mx-auto">
+                    Upload any CSV file, and my engine will automatically analyze columns to generate Bar, Pie, and Line charts instantly. No sign-up required.
+                </p>
+                <!-- Tooltip for help -->
+                <div class="mt-4 text-xs text-gray-500 bg-gray-900 inline-block px-3 py-1 rounded-full">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Tip: Upload a CSV with at least one text column (e.g., Category) and one number column (e.g., Sales).
+                </div>
+            </div>
+
+            <!-- Upload Area -->
+            <div id="drop-zone" class="border-2 border-dashed border-gray-700 rounded-xl p-12 text-center hover:border-blue-500 hover:bg-gray-800/50 transition-all cursor-pointer relative mb-12">
+                <input type="file" id="file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".csv">
+                <div id="upload-content">
+                    <i class="fa-solid fa-chart-line text-5xl text-blue-500 mb-4"></i>
+                    <p class="text-xl font-bold text-white">Drop your CSV file here</p>
+                    <p class="text-sm text-gray-400 mt-2">or click to browse</p>
+                </div>
+                <!-- Loading State -->
+                <div id="loading-state" class="hidden flex flex-col items-center">
+                    <div class="loader mb-4"></div>
+                    <p class="text-sm text-blue-400 animate-pulse">Analyzing Data Structure...</p>
+                </div>
+            </div>
+
+            <!-- Dashboard Result Area (Hidden initially) -->
+            <div id="dashboard-area" class="hidden animate-fade-in">
+                <div class="flex justify-between items-center mb-8 border-b border-gray-800 pb-4">
+                    <h4 class="text-2xl font-bold text-white">Analysis Results</h4>
+                    <button onclick="resetVisualizer()" class="text-sm text-red-400 hover:text-red-300 flex items-center">
+                        <i class="fa-solid fa-trash mr-2"></i> Clear Data
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Chart 1: Bar -->
+                    <div class="bg-[#0f0f10] p-4 rounded-2xl border border-gray-800">
+                        <h5 class="text-gray-400 text-sm mb-4 font-semibold uppercase">Category Distribution</h5>
+                        <canvas id="barChart"></canvas>
+                    </div>
+
+                    <!-- Chart 2: Pie -->
+                    <div class="bg-[#0f0f10] p-4 rounded-2xl border border-gray-800">
+                        <h5 class="text-gray-400 text-sm mb-4 font-semibold uppercase">Composition (Top 5)</h5>
+                        <canvas id="pieChart"></canvas>
+                    </div>
+
+                    <!-- Chart 3: Line -->
+                    <div class="bg-[#0f0f10] p-4 rounded-2xl border border-gray-800 md:col-span-2 lg:col-span-1">
+                        <h5 class="text-gray-400 text-sm mb-4 font-semibold uppercase">Trend Analysis</h5>
+                        <canvas id="lineChart"></canvas>
+                    </div>
+
+                    <!-- AI Insights & Prediction Section -->
+                    <div id="insights-section" class="md:col-span-3 mt-6 hidden">
+                        <div class="glass p-6 rounded-2xl border border-blue-500/30 bg-blue-900/10">
+                            <h4 class="text-xl font-bold text-blue-400 mb-4 flex items-center">
+                                <i class="fa-solid fa-robot mr-2"></i> AI Generated Insights
+                            </h4>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <!-- Summary Stats -->
+                                <div>
+                                    <h5 class="text-gray-400 text-sm uppercase font-semibold mb-3">Key Highlights</h5>
+                                    <ul class="space-y-3 text-sm text-gray-200">
+                                        <li class="flex justify-between border-b border-gray-700 pb-1">
+                                            <span>Highest Performer:</span>
+                                            <span id="stat-max" class="font-bold text-green-400">Loading...</span>
+                                        </li>
+                                        <li class="flex justify-between border-b border-gray-700 pb-1">
+                                            <span>Lowest Performer:</span>
+                                            <span id="stat-min" class="font-bold text-red-400">Loading...</span>
+                                        </li>
+                                        <li class="flex justify-between border-b border-gray-700 pb-1">
+                                            <span>Average Value:</span>
+                                            <span id="stat-avg" class="font-bold text-yellow-400">Loading...</span>
+                                        </li>
+                                        <li class="flex justify-between">
+                                            <span>Total Volume:</span>
+                                            <span id="stat-total" class="font-bold text-white">Loading...</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <!-- Prediction Model -->
+                                <div>
+                                    <h5 class="text-gray-400 text-sm uppercase font-semibold mb-3">Predictive Analysis</h5>
+                                    <div class="bg-black/40 p-4 rounded-xl border border-gray-700">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-gray-400">Trend Direction:</span>
+                                            <span id="trend-direction" class="px-2 py-1 rounded text-xs font-bold bg-gray-800">Calculating...</span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-400">Next Predicted Value:</span>
+                                            <span id="prediction-value" class="text-2xl font-bold text-blue-500">---</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-2 italic">
+                                            *Based on Simple Linear Regression (Least Squares Method)
+                                        </p>
+                                    </div>
+                                    <p id="insight-text" class="text-xs text-gray-400 mt-3 leading-relaxed">
+                                        Analyzing data patterns...
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Gemini Button Area -->
+                            <div class="mt-4 border-t border-gray-700 pt-4">
+                                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                                    <div class="text-sm text-gray-300">
+                                        <i class="fa-solid fa-sparkles text-yellow-400 mr-2"></i>
+                                        Want deeper business insights? Ask Gemini AI to analyze this dataset.
+                                    </div>
+                                    <button onclick="askGemini()" id="gemini-btn" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-2 px-6 rounded-full transition-all shadow-lg hover:shadow-blue-500/25 flex items-center">
+                                        <span class="mr-2">✨</span> Ask Gemini for Deep Analysis
+                                    </button>
+                                </div>
+                                
+                                <!-- Gemini Result Container -->
+                                <div id="gemini-result-container" class="hidden mt-6 bg-[#0a0a0a] rounded-xl p-6 border border-gray-700 relative overflow-hidden">
+                                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+                                    <h5 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-4 flex items-center">
+                                        <i class="fa-solid fa-brain mr-2"></i> Gemini Analysis
+                                    </h5>
+                                    
+                                    <div id="gemini-loader" class="hidden flex flex-col items-center justify-center py-8">
+                                        <div class="loader mb-4 border-t-purple-500 border-l-blue-500"></div>
+                                        <p class="text-gray-400 text-sm animate-pulse">Gemini is studying your data...</p>
+                                    </div>
+                                    
+                                    <div id="gemini-content" class="text-gray-300 text-sm leading-relaxed prose prose-invert max-w-none">
+                                        <!-- Gemini Output Will Go Here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black py-12 px-6 border-t border-gray-900">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+            <div class="mb-4 md:mb-0">
+                <p>Crafted by Gohil Mohit | Powered by <span class="text-blue-500">Data Science</span></p>
+            </div>
+            <div class="flex space-x-6">
+                <a href="https://www.linkedin.com/in/mohit-gohil-in/" target="_blank" class="hover:text-white transition-colors"><i class="fa-brands fa-linkedin text-xl"></i></a>
+                <a href="#" class="hover:text-white transition-colors"><i class="fa-brands fa-github text-xl"></i></a>
+                <a href="mailto:gohilmohit798@gmail.com" class="hover:text-white transition-colors"><i class="fa-solid fa-envelope text-xl"></i></a>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto mt-8 text-xs text-gray-600 text-center md:text-left">
+            Copyright © 2025 Gohil Mohit. All rights reserved. 
+        </div>
+    </footer>
+
+    <!-- MODALS -->
+
+    <!-- Project Modal Overlay -->
+    <div id="project-modal" class="fixed inset-0 z-[100] flex items-center justify-center glass modal backdrop-blur-3xl">
+        <div class="bg-[#1c1c1e] w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl relative border border-gray-700">
+            <!-- Close Button -->
+            <button onclick="closeModal()" class="absolute top-4 right-4 bg-gray-700 rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-600 z-50">
+                <i class="fa-solid fa-xmark text-white"></i>
+            </button>
+
+            <!-- Content Container -->
+            <div id="modal-content" class="p-8 md:p-12">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contact-modal" class="fixed inset-0 z-[100] flex items-center justify-center glass modal backdrop-blur-lg p-4">
+        <div class="bg-black w-full max-w-lg rounded-3xl border border-gray-800 shadow-2xl relative p-8">
+             <button onclick="document.getElementById('contact-modal').classList.remove('open')" class="absolute top-4 right-4 text-gray-500 hover:text-white">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            
+            <h3 class="text-2xl font-bold mb-2">Let's Collaborate</h3>
+            <p class="text-gray-400 text-sm mb-6">Reach out to me via email or phone.</p>
+            
+            <form onsubmit="event.preventDefault(); alert('Message sent successfully!'); document.getElementById('contact-modal').classList.remove('open');">
+                <div class="mb-4">
+                    <label class="block text-xs text-gray-500 uppercase tracking-wide mb-1">Your Name</label>
+                    <input type="text" class="w-full bg-[#1c1c1e] border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Recruiter Name">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs text-gray-500 uppercase tracking-wide mb-1">My Email</label>
+                    <input type="email" value="gohilmohit798@gmail.com" readonly class="w-full bg-[#1c1c1e] border border-gray-700 rounded-lg px-4 py-3 text-gray-400 cursor-not-allowed">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs text-gray-500 uppercase tracking-wide mb-1">My Phone</label>
+                    <input type="text" value="+91 8320860783" readonly class="w-full bg-[#1c1c1e] border border-gray-700 rounded-lg px-4 py-3 text-gray-400 cursor-not-allowed">
+                </div>
+                <button type="submit" class="w-full bg-white text-black font-bold py-3 rounded-lg hover:bg-gray-200 transition-colors">
+                    Send Inquiry
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
+    <script>
+        const apiKey = ""; // API Key injected by environment
+
+        document.addEventListener('DOMContentLoaded', () => {
+            AOS.init({ once: true, offset: 50, duration: 1000, easing: 'ease-out-cubic' });
+            particlesJS("particles-js", {
+                "particles": { "number": { "value": 40 }, "color": { "value": "#ffffff" }, "shape": { "type": "circle" }, "opacity": { "value": 0.3 }, "size": { "value": 3 }, "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.1 }, "move": { "enable": true, "speed": 1 } },
+                "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "repulse" }, "onclick": { "enable": true, "mode": "push" } } }
+            });
+            new Typed('#typed-text', {
+                strings: ['Python & SQL.', 'Machine Learning.', 'Tableau Dashboards.', 'Data Analytics.', 'Business Analytics.'],
+                typeSpeed: 50, backSpeed: 30, loop: true
+            });
+            VanillaTilt.init(document.querySelectorAll(".glass"), { max: 10, speed: 400, glare: true, "max-glare": 0.1 });
+            gsap.registerPlugin(ScrollTrigger);
+            
+            const text = document.getElementById('scroll-text');
+            const words = text.innerText.split(' ');
+            text.innerHTML = '';
+            words.forEach(word => { const span = document.createElement('span'); span.innerText = word + ' '; text.appendChild(span); });
+            gsap.to(text.querySelectorAll('span'), {
+                scrollTrigger: { trigger: "#about", start: "top 60%", end: "bottom 60%", scrub: 1 },
+                opacity: 1, stagger: 0.1, duration: 1, ease: "power2.out"
+            });
+
+            window.addEventListener('scroll', () => {
+                const nav = document.getElementById('navbar');
+                nav.style.background = window.scrollY > 50 ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.4)';
+                window.scrollY > 50 ? nav.classList.add('shadow-lg') : nav.classList.remove('shadow-lg');
+            });
+
+            const cursorDot = document.querySelector('.cursor-dot');
+            const cursorOutline = document.querySelector('.cursor-outline');
+            window.addEventListener('mousemove', (e) => {
+                cursorDot.style.left = `${e.clientX}px`; cursorDot.style.top = `${e.clientY}px`;
+                cursorOutline.animate({ left: `${e.clientX}px`, top: `${e.clientY}px` }, { duration: 500, fill: "forwards" });
+            });
+        });
+
+        const projectData = {
+            'loan': {
+                title: 'KNN Loan Applicant Credit Risk Analysis',
+                subtitle: 'ML Classification Model',
+                problem: 'Performed data preprocessing including handling missing values and feature scaling to prepare clean input for the model.',
+                dataset: 'Key financial & demographic features from loan applicants.',
+                model: 'Built a K-Nearest Neighbors (KNN) classification model to predict loan applicant credit risk. Evaluated model performance using accuracy score and confusion matrix, improving predictions through hyperparameter tuning.',
+                result: 'Successfully classified loan applicants based on risk, aiding in better financial decision-making.',
+                link: '#'
+            },
+            'blinkit': {
+                title: 'Sales Analysis & Performance Dashboard - Blinkit',
+                subtitle: 'Tableau Visual Analytics',
+                problem: 'Analyzed Blinkit\'s sales data and identified key performance metrics including revenue, order volume, and customer behavior.',
+                dataset: 'Blinkit Sales Data (Orders, Revenue, Locations, Categories).',
+                model: 'Built an interactive Tableau dashboard with filters, KPIs, bar charts, and time-based analytics for data-driven decision making. Visualized sales performance across locations and product categories.',
+                result: 'Derived business insights to optimize sales strategy and improve outlet performance.',
+                link: 'https://public.tableau.com/app/profile/mohit.gohil3522/viz/blinkitproject17514390311560/Dashboard1'
+            },
+            'blinkit-sql': {
+                title: 'Blinkit Grocery Sales Analysis',
+                subtitle: 'SQL Data Analysis & Insights',
+                problem: 'Identify sales patterns, customer preferences, product performance, and outlet profitability using data-driven insights.',
+                dataset: 'Blinkit grocery dataset cleaned and explored for 50+ business insights.',
+                model: '<b>Key Business Insights:</b><ul class="list-disc ml-5 mt-2"><li><b>Top Categories:</b> Dairy & Snacks generate highest revenue.</li><li><b>Best MRP Range:</b> ₹50–₹200 items sell the most.</li><li><b>Location:</b> Tier 1 locations are most profitable.</li></ul>',
+                result: 'Performed 50+ SQL queries to reveal trends, creating a foundation for future pricing strategies.',
+                link: '#'
+            },
+            'python': {
+                title: 'Real-World Problem Solving Using Python',
+                subtitle: 'Python Programming',
+                problem: 'Developed multiple Python programs to solve real-world problems using conditional logic, loops, and functions.',
+                dataset: 'User inputs and generated data.',
+                model: 'Implemented data handling & user-input-based operations to build interactive and efficient Python applications. Focused on clean code practices and modular structure.',
+                result: 'Improved reliability and performance of automated tasks.',
+                link: '#'
+            }
+        };
+
+        function openProjectModal(id) {
+            const data = projectData[id];
+            const modal = document.getElementById('project-modal');
+            const content = document.getElementById('modal-content');
+            const actionButton = data.link && data.link !== '#' 
+                ? `<a href="${data.link}" target="_blank" class="bg-white text-black px-6 py-3 rounded-full font-bold hover:bg-gray-200 transition-colors"><i class="fa-solid fa-external-link-alt mr-2"></i>View Live</a>` 
+                : `<button class="bg-white text-black px-6 py-3 rounded-full font-bold hover:bg-gray-200 transition-colors"><i class="fa-brands fa-github mr-2"></i>View Code</button>`;
+
+            content.innerHTML = `
+                <h2 class="text-3xl md:text-4xl font-bold mb-2 text-white">${data.title}</h2>
+                <p class="text-blue-500 text-lg mb-8">${data.subtitle}</p>
+                <div class="space-y-6">
+                    <div><h4 class="text-gray-400 text-sm uppercase tracking-wide font-semibold mb-1">Process & Goal</h4><p class="text-gray-200 leading-relaxed">${data.problem}</p></div>
+                    <div><h4 class="text-gray-400 text-sm uppercase tracking-wide font-semibold mb-1">Data & Approach</h4><p class="text-gray-200 leading-relaxed">${data.dataset}</p><p class="text-gray-200 leading-relaxed mt-2">${data.model}</p></div>
+                    <div class="bg-blue-900/20 border border-blue-500/30 p-4 rounded-lg"><h4 class="text-blue-400 text-sm uppercase tracking-wide font-semibold mb-1">Outcome</h4><p class="text-white font-medium">${data.result}</p></div>
+                </div>
+                <div class="mt-8 flex gap-4">${actionButton}</div>
+            `;
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('project-modal').classList.remove('open');
+            document.body.style.overflow = 'auto';
+        }
+        document.getElementById('project-modal').addEventListener('click', (e) => { if (e.target.id === 'project-modal') closeModal(); });
+
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const uploadContent = document.getElementById('upload-content');
+        const loadingState = document.getElementById('loading-state');
+        const dashboardArea = document.getElementById('dashboard-area');
+        let charts = {};
+        let currentLabels = [], currentValues = [], currentLabelName = "", currentValueName = "";
+
+        fileInput.addEventListener('change', handleFiles);
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-blue-500', 'bg-gray-800'); });
+        dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); dropZone.classList.remove('border-blue-500', 'bg-gray-800'); });
+        dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('border-blue-500', 'bg-gray-800'); const files = e.dataTransfer.files; if(files.length) { fileInput.files = files; handleFiles(); } });
+
+        function handleFiles() {
+            if (fileInput.files.length) {
+                const file = fileInput.files[0];
+                if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) { alert('Please upload a valid CSV file.'); return; }
+                processCSV(file);
+            }
+        }
+
+        function processCSV(file) {
+            uploadContent.classList.add('hidden'); loadingState.classList.remove('hidden'); loadingState.classList.add('flex');
+            Papa.parse(file, {
+                header: true, dynamicTyping: true, skipEmptyLines: true,
+                complete: function(results) {
+                    const data = results.data; const meta = results.meta;
+                    if (data.length === 0) { alert("CSV is empty"); resetVisualizer(); return; }
+                    let labelCol = null, dataCol = null; const fields = meta.fields; const firstRow = data[0];
+                    for (let field of fields) { if (typeof firstRow[field] === 'string' && !labelCol) labelCol = field; if (typeof firstRow[field] === 'number' && !dataCol) dataCol = field; }
+                    if (!labelCol) labelCol = fields[0]; if (!dataCol) dataCol = fields.find(f => f !== labelCol) || fields[1];
+                    if (!dataCol) { alert("Could not find a numeric column to plot."); resetVisualizer(); return; }
+                    
+                    // --- CHANGED: Validating data before slice ---
+                    // Filter out invalid data points where dataCol is not a number
+                    const validData = data.filter(d => d[labelCol] != null && d[dataCol] != null && !isNaN(d[dataCol]));
+                    
+                    if (validData.length === 0) { alert("No valid numeric data found in selected column."); resetVisualizer(); return; }
+
+                    const plotData = validData.slice(0, 20);
+                    // --- CHANGED: Casting labels to String explicitly to prevent Chart.js errors ---
+                    const labels = plotData.map(d => String(d[labelCol])); 
+                    const values = plotData.map(d => Number(d[dataCol]));
+                    
+                    currentLabels = labels; currentValues = values; currentLabelName = labelCol; currentValueName = dataCol;
+                    renderCharts(labels, values, labelCol, dataCol); generateInsights(labels, values, labelCol, dataCol);
+                    setTimeout(() => { loadingState.classList.add('hidden'); loadingState.classList.remove('flex'); dropZone.classList.add('hidden'); dashboardArea.classList.remove('hidden'); gsap.from("#dashboard-area", { y: 20, opacity: 0, duration: 0.5 }); }, 800);
+                },
+                error: function(err) { alert("Error: " + err.message); resetVisualizer(); }
+            });
+        }
+
+        function renderCharts(labels, values, labelName, valueName) {
+            if (charts.bar) charts.bar.destroy(); if (charts.pie) charts.pie.destroy(); if (charts.line) charts.line.destroy();
+            const commonOptions = { responsive: true, plugins: { legend: { labels: { color: '#9ca3af' } } }, scales: { y: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } }, x: { grid: { display: false }, ticks: { color: '#9ca3af' } } } };
+            charts.bar = new Chart(document.getElementById('barChart'), { type: 'bar', data: { labels: labels, datasets: [{ label: valueName, data: values, backgroundColor: '#3b82f6', borderRadius: 4 }] }, options: commonOptions });
+            charts.pie = new Chart(document.getElementById('pieChart'), { type: 'doughnut', data: { labels: labels.slice(0, 5), datasets: [{ data: values.slice(0, 5), backgroundColor: ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'], borderWidth: 0 }] }, options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: '#fff' } } } } });
+            charts.line = new Chart(document.getElementById('lineChart'), { type: 'line', data: { labels: labels, datasets: [{ label: `${valueName} Trend`, data: values, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true, tension: 0.4 }] }, options: commonOptions });
+        }
+
+        function resetVisualizer() {
+            dashboardArea.classList.add('hidden'); document.getElementById('insights-section').classList.add('hidden'); document.getElementById('gemini-result-container').classList.add('hidden');
+            dropZone.classList.remove('hidden'); uploadContent.classList.remove('hidden'); loadingState.classList.add('hidden'); loadingState.classList.remove('flex'); fileInput.value = '';
+        }
+
+        function generateInsights(labels, values, labelName, valueName) {
+            document.getElementById('insights-section').classList.remove('hidden');
+            const maxVal = Math.max(...values), minVal = Math.min(...values), sumVal = values.reduce((a, b) => a + b, 0), avgVal = sumVal / values.length;
+            const maxIndex = values.indexOf(maxVal), minIndex = values.indexOf(minVal);
+            document.getElementById('stat-max').innerText = `${labels[maxIndex]} (${maxVal.toLocaleString()})`;
+            document.getElementById('stat-min').innerText = `${labels[minIndex]} (${minVal.toLocaleString()})`;
+            document.getElementById('stat-avg').innerText = avgVal.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            document.getElementById('stat-total').innerText = sumVal.toLocaleString();
+            const n = values.length; let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+            for (let i = 0; i < n; i++) { sumX += i; sumY += values[i]; sumXY += i * values[i]; sumXX += i * i; }
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX); const intercept = (sumY - slope * sumX) / n; const nextValue = slope * n + intercept;
+            const trendEl = document.getElementById('trend-direction');
+            if (slope > 0) { trendEl.innerText = "📈 Upward Trend"; trendEl.className = "px-2 py-1 rounded text-xs font-bold bg-green-900 text-green-300"; }
+            else if (slope < 0) { trendEl.innerText = "📉 Downward Trend"; trendEl.className = "px-2 py-1 rounded text-xs font-bold bg-red-900 text-red-300"; }
+            else { trendEl.innerText = "➡️ Stable"; trendEl.className = "px-2 py-1 rounded text-xs font-bold bg-gray-700 text-gray-300"; }
+            document.getElementById('prediction-value').innerText = nextValue.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            document.getElementById('insight-text').innerHTML = `Based on the data provided for <b>${labelName}</b>, the highest performing category is <b>${labels[maxIndex]}</b>. The overall trend appears to be <b>${slope > 0 ? 'positive' : 'negative'}</b>. If this trend continues, the projected value for the next entry is estimated to be around <b>${Math.round(nextValue).toLocaleString()}</b>.`;
+        }
+
+        async function askGemini() {
+            const btn = document.getElementById('gemini-btn'); const resultContainer = document.getElementById('gemini-result-container'); const loader = document.getElementById('gemini-loader'); const content = document.getElementById('gemini-content');
+            btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed', 'gemini-pulse'); btn.innerHTML = '<span class="mr-2">✨</span> Analyzing...';
+            resultContainer.classList.remove('hidden'); loader.classList.remove('hidden'); loader.classList.add('flex'); content.innerHTML = '';
+            const prompt = `You are a senior data scientist analyzing a dataset. Summary: X-Axis: ${currentLabelName}, Y-Axis: ${currentValueName}, Top 5 Sample: ${currentLabels.slice(0,5).join(', ')} : ${currentValues.slice(0,5).join(', ')}, Total: ${currentValues.length}. Provide a concise analysis in markdown: 1. Data Overview 2. Trend Analysis 3. Key Anomalies 4. Actionable Recommendation. Keep it professional and under 150 words.`;
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });
+                const data = await response.json();
+                if (data.candidates && data.candidates[0].content) { content.innerHTML = marked.parse(data.candidates[0].content.parts[0].text); } else { content.innerHTML = '<p class="text-red-400">Gemini could not generate an analysis.</p>'; }
+            } catch (error) { content.innerHTML = '<p class="text-red-400">Connection error.</p>'; } 
+            finally { loader.classList.add('hidden'); loader.classList.remove('flex'); btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed', 'gemini-pulse'); btn.innerHTML = '<span class="mr-2">✨</span> Ask Gemini for Deep Analysis'; }
+        }
+    </script>
+</body>
+</html>
